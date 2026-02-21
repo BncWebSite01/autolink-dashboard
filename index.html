@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Autolink Control Tower | Enterprise</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { 
+            --accent: #00a8e8; 
+            --bg-light: #f0f4f8; 
+            --card-bg: #ffffff; 
+            --text-main: #2d3748;
+        }
+        body { 
+            background: var(--bg-light); 
+            color: var(--text-main); 
+            font-family: 'Inter', sans-serif; 
+            /* ยอมให้ Scroll ได้ในแนวตั้งสำหรับมือถือ */
+            overflow-y: auto; 
+        }
+        .glass { 
+            background: var(--card-bg); 
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+        .stat-card { transition: 0.3s ease; }
+        
+        /* ปรับปรุง Slider ให้ใหญ่ขึ้นกดง่ายในมือถือ */
+        input[type=range] { -webkit-appearance: none; background: #e2e8f0; border-radius: 99px; height: 12px; }
+        input[type=range]::-webkit-slider-thumb { 
+            -webkit-appearance: none; height: 30px; width: 30px; 
+            border-radius: 50%; background: var(--accent); cursor: pointer; 
+            box-shadow: 0 4px 10px rgba(0, 168, 232, 0.3); border: 4px solid white;
+        }
+        
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .notification-item { animation: slideIn 0.3s ease-out; }
+
+        /* ซ่อน Scrollbar สำหรับความสวยงาม */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <nav class="h-16 border-b border-gray-200 flex items-center justify-between px-4 md:px-8 bg-white/80 backdrop-blur-xl sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg flex items-center justify-center shadow-lg">
+                <i class="fas fa-link text-white text-sm"></i>
+            </div>
+            <h1 class="text-sm md:text-xl font-black tracking-widest italic text-gray-800">AUTOLINK <span class="hidden sm:inline text-cyan-500 font-light">SYSTEMS</span></h1>
+        </div>
+        
+        <div id="connection-status" class="text-[9px] md:text-[10px] font-bold px-3 py-1 rounded-full border border-blue-200 text-blue-600 bg-blue-50">
+            ONLINE
+        </div>
+    </nav>
+
+    <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+        <aside class="hidden md:flex w-20 border-r border-gray-200 flex-col items-center py-8 gap-8 bg-white/50">
+            <button class="text-white bg-cyan-500 p-4 rounded-2xl shadow-lg"><i class="fas fa-th-large text-xl"></i></button>
+            <button class="text-gray-400 p-4"><i class="fas fa-sliders-h text-xl"></i></button>
+            <div class="mt-auto text-gray-300 text-[10px] font-mono rotate-180">v2.0.4-PRO</div>
+        </aside>
+
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto">
+            <div class="grid grid-cols-12 gap-4 md:gap-6">
+                
+                <div class="col-span-12 lg:col-span-4 stat-card glass p-6 md:p-8 rounded-[2rem] flex flex-col items-center justify-center">
+                    <p class="text-gray-500 text-xs font-black tracking-widest uppercase mb-2">Temperature</p>
+                    <div id="gauge-container" class="w-full"></div>
+                    <div class="text-center mt-[-50px] z-10">
+                        <h2 id="live-value" class="text-5xl md:text-7xl font-black text-cyan-600">--.-</h2>
+                        <p class="text-gray-400 text-[10px] font-mono tracking-widest">CELSIUS</p>
+                    </div>
+                </div>
+
+                <div class="col-span-12 lg:col-span-8 stat-card glass p-6 md:p-8 rounded-[2rem]">
+                    <h3 class="font-bold text-xs uppercase text-gray-500 mb-4"><i class="fas fa-wave-square mr-2 text-cyan-500"></i> Live Telemetry</h3>
+                    <div id="main-chart-canvas"></div>
+                </div>
+
+                <div class="col-span-12 lg:col-span-4 stat-card glass p-6 md:p-8 rounded-[2rem]">
+                    <h3 class="font-bold text-xs uppercase text-gray-500 mb-6">Threshold Set</h3>
+                    <input type="range" id="threshold-slider" min="0" max="100" value="75" class="w-full">
+                    <div class="flex justify-between mt-4 text-xs font-mono font-bold text-cyan-600">
+                        <span>0%</span>
+                        <span id="slider-val" class="bg-cyan-100 px-3 py-1 rounded-lg">75%</span>
+                        <span>100%</span>
+                    </div>
+                </div>
+
+                <div class="col-span-12 lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+                    <button onclick="publishCmd('ON')" class="p-6 md:p-8 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-[2rem] shadow-xl active:scale-95 transition-transform">
+                        <div class="text-left">
+                            <i class="fas fa-play-circle text-2xl mb-2"></i>
+                            <h3 class="font-black text-xl italic">INITIATE</h3>
+                        </div>
+                    </button>
+
+                    <button onclick="publishCmd('OFF')" class="p-6 md:p-8 bg-white border-2 border-red-100 text-red-500 rounded-[2rem] shadow-md active:scale-95 transition-transform">
+                        <div class="text-left">
+                            <i class="fas fa-stop-circle text-2xl mb-2"></i>
+                            <h3 class="font-black text-xl italic">STOP</h3>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="mt-8 md:hidden">
+                <h3 class="text-xs font-black text-gray-400 mb-4 uppercase">System Logs</h3>
+                <div id="notification-list-mobile" class="space-y-3"></div>
+            </div>
+        </main>
+
+        <aside class="hidden xl:block w-80 border-l border-gray-200 bg-white/50 p-6 overflow-y-auto">
+            <h3 class="text-xs font-black text-gray-400 mb-6 uppercase">System Logs</h3>
+            <div id="notification-list" class="space-y-4"></div>
+        </aside>
+    </div>
+
+    <script>
+        // --- ส่วนการเชื่อมต่อ: แก้ไขตรงนี้ถ้าเอา Server ขึ้น Cloud ---
+        // ถ้าเปิดผ่าน GitHub (https) ให้ใส่ URL ของ Server คุณแทน
+        const serverUrl = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" 
+                          ? "http://localhost:3000" 
+                          : "http://172.20.10.3:3000"; // IP ของคุณ
+
+        const socket = io(serverUrl); 
+        
+        // --- ApexCharts Setup ---
+        const gaugeChart = new ApexCharts(document.querySelector("#gauge-container"), {
+            chart: { height: 280, type: 'radialBar' },
+            series: [0],
+            plotOptions: {
+                radialBar: {
+                    startAngle: -135, endAngle: 135,
+                    hollow: { size: '65%' },
+                    track: { background: '#f1f5f9' },
+                    dataLabels: { show: false }
+                }
+            },
+            colors: ['#00a8e8'],
+            stroke: { lineCap: 'round' }
+        });
+        gaugeChart.render();
+
+        const mainChart = new ApexCharts(document.querySelector("#main-chart-canvas"), {
+            chart: { height: 250, type: 'area', toolbar: false, animations: { enabled: true, easing: 'linear', dynamicAnimation: { speed: 800 } } },
+            series: [{ name: 'Value', data: [] }],
+            xaxis: { type: 'datetime', range: 60000 },
+            stroke: { curve: 'smooth', width: 3 },
+            fill: { type: 'gradient', gradient: { opacityFrom: 0.3, opacityTo: 0 } },
+            colors: ['#00a8e8']
+        });
+        mainChart.render();
+
+        // --- Logic ---
+        socket.on('telemetry_stream', (data) => {
+            const val = parseFloat(data.value).toFixed(1);
+            document.getElementById('live-value').innerText = val;
+            gaugeChart.updateSeries([val]);
+            mainChart.appendData([{ data: [{ x: new Date().getTime(), y: val }] }]);
+        });
+
+        const publishCmd = (cmd) => {
+            socket.emit('control_device', { deviceId: 'ESP32_01', command: cmd });
+            addLog("CMD", `Sent: ${cmd}`, "text-cyan-600", "bg-cyan-50");
+        };
+
+        document.getElementById('threshold-slider').oninput = function() {
+            document.getElementById('slider-val').innerText = this.value + "%";
+            socket.emit('set_threshold', { value: this.value });
+        };
+
+        function addLog(type, msg, color, bg) {
+            const list = window.innerWidth < 768 ? document.getElementById('notification-list-mobile') : document.getElementById('notification-list');
+            const item = document.createElement('div');
+            item.className = `notification-item p-4 rounded-xl border border-gray-100 ${bg} mb-3 text-[10px] font-bold`;
+            item.innerHTML = `
+                <div class="flex justify-between">
+                    <span class="${color}">${type}</span>
+                    <span class="text-gray-400">${new Date().toLocaleTimeString()}</span>
+                </div>
+                <div class="text-gray-600 mt-1">${msg}</div>
+            `;
+            list.prepend(item);
+            if(list.children.length > 5) list.lastElementChild.remove();
+        }
+
+        // เช็คสถานะการเชื่อมต่อ
+        socket.on('connect', () => {
+            document.getElementById('connection-status').innerText = "CONNECTED";
+            document.getElementById('connection-status').className = "text-[10px] font-bold px-3 py-1 rounded-full border border-green-200 text-green-600 bg-green-50";
+        });
+        socket.on('disconnect', () => {
+            document.getElementById('connection-status').innerText = "OFFLINE";
+            document.getElementById('connection-status').className = "text-[10px] font-bold px-3 py-1 rounded-full border border-red-200 text-red-600 bg-red-50";
+        });
+    </script>
+</body>
+</html>
