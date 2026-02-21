@@ -3,151 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Autolink | รักออม Premium</title>
+    <title>AUTOLINK | IoT Control Tower</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,900;1,900&family=Mitr:wght@700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,900;1,900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --accent: #f472b6; --bg-light: #fffcfd; }
-        body { background: var(--bg-light); font-family: 'Kanit', sans-serif; overflow-x: hidden; }
+        :root { --accent: #f472b6; --bg-dark: #0f172a; }
+        body { background: #f8fafc; font-family: 'Kanit', sans-serif; }
         
-        .premium-text {
-            background: linear-gradient(to right, #ec4899, #ef4444, #f43f5e, #ec4899);
-            background-size: 200% auto;
+        .iot-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 2rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .iot-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px -15px rgba(0,0,0,0.1); }
+        
+        .led-indicator { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        .led-on { background: #22c55e; box-shadow: 0 0 10px #22c55e; }
+        .led-off { background: #cbd5e1; }
+
+        .btn-toggle {
+            transition: all 0.2s;
+            border-radius: 1.25rem;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        /* สไตล์รักออมแบบซ่อนไว้ใน Logo */
+        .logo-text {
+            background: linear-gradient(to right, #6366f1, #ec4899);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: shine 3s linear infinite, floating 4s ease-in-out infinite;
-            filter: drop-shadow(0 15px 15px rgba(236, 72, 153, 0.3));
-        }
-
-        @keyframes shine { to { background-position: 200% center; } }
-        @keyframes floating {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-15px) scale(1.02); }
-        }
-
-        .glass { 
-            background: rgba(255, 255, 255, 0.8); 
-            backdrop-filter: blur(15px);
-            box-shadow: 0 10px 40px -10px rgba(244, 114, 182, 0.2); 
-            border: 1px solid rgba(255, 255, 255, 0.9); 
-        }
-
-        .btn-love { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .btn-love:hover { transform: translateY(-5px); box-shadow: 0 20px 30px -10px rgba(236, 72, 153, 0.5); }
-
-        /* เอฟเฟกต์หัวใจกระจาย */
-        .heart-particle {
-            position: fixed;
-            pointer-events: none;
-            animation: fly 1s ease-out forwards;
-            z-index: 100;
-        }
-        @keyframes fly {
-            0% { transform: translate(0, 0) scale(1); opacity: 1; }
-            100% { transform: translate(var(--tw-translate-x), var(--tw-translate-y)) scale(0); opacity: 0; }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="p-4 md:p-8">
 
-    <div class="relative w-full py-16 flex flex-col justify-center items-center overflow-hidden">
-        <div class="absolute w-64 h-64 bg-pink-200 blur-[120px] rounded-full -top-10 -left-10 opacity-60"></div>
-        <div class="absolute w-64 h-64 bg-rose-200 blur-[120px] rounded-full -bottom-10 -right-10 opacity-60"></div>
+    <header class="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div>
+            <h1 class="text-4xl font-[900] italic tracking-tighter logo-text">AUTOLINK <span class="text-slate-800 font-light">PRO</span></h1>
+            <p class="text-[10px] font-bold text-slate-400 tracking-[0.3em] uppercase mt-1">Industrial IoT Ecosystem</p>
+        </div>
         
-        <h1 class="text-8xl md:text-[14rem] font-[900] italic tracking-tighter premium-text relative z-10">
-            รักออม
-        </h1>
-        <div class="z-10 bg-white/30 backdrop-blur-sm px-6 py-1 rounded-full border border-white/50 mt-[-20px] shadow-sm">
-            <p class="text-[10px] md:text-xs font-bold tracking-[0.5em] text-pink-500 uppercase">Always Connected • Forever Powered</p>
+        <div class="flex items-center gap-4 bg-white p-2 px-6 rounded-full shadow-sm border border-slate-100">
+            <div id="status-dot" class="led-indicator led-off"></div>
+            <span id="status-text" class="text-xs font-black text-slate-400 uppercase tracking-widest">Connecting...</span>
         </div>
-    </div>
+    </header>
 
-    <nav class="h-16 border-b border-pink-50 flex items-center justify-between px-8 bg-white/70 backdrop-blur-md sticky top-0 z-50">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl flex items-center justify-center shadow-lg">
-                <i class="fas fa-heart text-white"></i>
-            </div>
-            <h1 class="font-bold italic text-slate-700">AUTOLINK <span class="text-pink-500 font-black">OS</span></h1>
-        </div>
-        <div id="status" class="text-[10px] font-black px-4 py-1.5 rounded-full border border-slate-200 text-slate-400 bg-white shadow-inner">DISCONNECTED</div>
-    </nav>
-
-    <main class="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full grid grid-cols-12 gap-8">
-        <div class="col-span-12 lg:col-span-4 glass p-10 rounded-[3.5rem] flex flex-col items-center justify-center relative">
-            <p class="text-slate-400 text-[10px] font-black tracking-widest uppercase mb-4">Core Temperature</p>
-            <div id="gauge-container" class="w-full"></div>
-            <div class="text-center mt-[-50px]">
-                <h2 id="live-value" class="text-7xl font-black text-slate-800">00.0</h2>
-                <span class="text-pink-500 font-bold">°C</span>
-            </div>
-        </div>
-
-        <div class="col-span-12 lg:col-span-8 glass p-10 rounded-[3.5rem]">
+    <main class="max-w-7xl mx-auto grid grid-cols-12 gap-6">
+        
+        <div class="col-span-12 lg:col-span-4 iot-card p-8 relative overflow-hidden">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Telemetry Stream</h3>
-                <div class="h-2 w-2 rounded-full bg-pink-500 animate-ping"></div>
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Core Health</span>
+                <i class="fas fa-thermometer-half text-pink-500"></i>
+            </div>
+            <div id="gauge-container"></div>
+            <div class="text-center mt-[-40px]">
+                <h2 id="live-value" class="text-6xl font-black text-slate-800 italic">00.0</h2>
+                <p class="text-pink-500 font-bold tracking-widest">DEGREES CELSIUS</p>
+            </div>
+        </div>
+
+        <div class="col-span-12 lg:col-span-8 iot-card p-8">
+            <div class="flex justify-between items-center mb-6">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Data Streams</span>
+                <div class="flex gap-2 text-[10px] font-bold">
+                    <span class="text-blue-500">REAL-TIME</span>
+                    <span class="text-slate-300">HISTORY</span>
+                </div>
             </div>
             <div id="main-chart"></div>
         </div>
 
         <div class="col-span-12 lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <button onclick="publishCmd('ON')" class="btn-love p-10 bg-slate-900 text-white rounded-[2.5rem] shadow-2xl flex flex-col items-start overflow-hidden relative group">
-                <i class="fas fa-play text-pink-500 mb-4 z-10 text-2xl"></i>
-                <span class="font-black italic text-3xl z-10">START</span>
-                <span class="text-[9px] font-bold tracking-[0.2em] opacity-50 z-10">INITIATE ALL NODES</span>
-                <i class="fas fa-bolt absolute -right-4 -bottom-4 text-8xl text-white opacity-5 group-hover:rotate-12 transition-transform"></i>
-            </button>
+            <div class="iot-card p-6 border-l-4 border-l-slate-900">
+                <h3 class="text-xs font-black text-slate-400 uppercase mb-4">Main Process</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="publishCmd('START')" class="btn-toggle p-4 bg-slate-900 text-white hover:bg-black active:scale-95">
+                        <i class="fas fa-bolt"></i> START
+                    </button>
+                    <button onclick="publishCmd('STOP')" class="btn-toggle p-4 bg-white border-2 border-slate-100 text-slate-400 hover:border-red-200 hover:text-red-500 active:scale-95">
+                        <i class="fas fa-power-off"></i> STOP
+                    </button>
+                </div>
+            </div>
 
-            <button onclick="publishCmd('OFF')" class="btn-love p-10 bg-white border border-pink-100 text-pink-500 rounded-[2.5rem] shadow-xl flex flex-col items-start overflow-hidden relative group">
-                <i class="fas fa-stop-circle mb-4 z-10 text-2xl"></i>
-                <span class="font-black italic text-3xl z-10">STOP</span>
-                <span class="text-[9px] font-bold tracking-[0.2em] text-slate-400 z-10">EMERGENCY SHUTDOWN</span>
-                <i class="fas fa-power-off absolute -right-4 -bottom-4 text-8xl text-pink-500 opacity-5 group-hover:scale-110 transition-transform"></i>
-            </button>
-        </div>
-
-        <div class="col-span-12 lg:col-span-5 glass p-10 rounded-[2.5rem] flex flex-col justify-center">
-            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-8">System Threshold</h3>
-            <input type="range" id="threshold" min="0" max="100" value="75" class="w-full accent-pink-500 h-2 bg-pink-100 rounded-lg appearance-none cursor-pointer">
-            <div class="flex justify-between mt-6">
-                <span class="text-[10px] font-bold text-slate-300">MIN 0%</span>
-                <span id="thresh-val" class="text-3xl font-black text-pink-500">75%</span>
-                <span class="text-[10px] font-bold text-slate-300">MAX 100%</span>
+            <div class="iot-card p-6 border-l-4 border-l-pink-500">
+                <h3 class="text-xs font-black text-slate-400 uppercase mb-4">Auxiliary Units</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="publishCmd('LIGHT_ON')" class="btn-toggle p-4 bg-pink-50 text-pink-600 border border-pink-100">
+                        <i class="fas fa-lightbulb"></i> ON
+                    </button>
+                    <button onclick="publishCmd('LIGHT_OFF')" class="btn-toggle p-4 bg-white text-slate-300 border border-slate-100">
+                        OFF
+                    </button>
+                </div>
             </div>
         </div>
+
+        <div class="col-span-12 lg:col-span-5 iot-card p-8 flex flex-col justify-between">
+            <div>
+                <h3 class="text-xs font-black text-slate-400 uppercase mb-6 flex justify-between">
+                    System Sensitivity <span id="thresh-val" class="text-pink-500 font-black text-lg">75%</span>
+                </h3>
+                <input type="range" id="threshold" min="0" max="100" value="75" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-900">
+            </div>
+            
+            <div class="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center">
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-black text-slate-300 uppercase">Operator</span>
+                    <span class="text-sm font-black text-slate-700 italic">รักออม Edition</span>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-pink-500 to-rose-400 flex items-center justify-center text-white shadow-lg shadow-pink-200">
+                    <i class="fas fa-user-gear"></i>
+                </div>
+            </div>
+        </div>
+
     </main>
+
+    <div id="love-popup" class="fixed inset-0 flex items-center justify-center z-[999] opacity-0 pointer-events-none transition-all duration-500">
+        <div class="bg-white/90 backdrop-blur-2xl px-16 py-8 rounded-[3rem] border-4 border-pink-400 shadow-2xl text-center">
+            <h1 class="text-8xl font-[900] italic tracking-tighter logo-text mb-2">รักออม</h1>
+            <p class="text-xs font-black text-pink-400 uppercase tracking-[0.5em]">Command Executed</p>
+        </div>
+    </div>
 
     <script>
         const MY_IP = "172.20.10.3";
         const socket = io(window.location.hostname === "localhost" ? "http://localhost:3000" : `http://${MY_IP}:3000`);
 
+        // Charts Setup
         const gauge = new ApexCharts(document.querySelector("#gauge-container"), {
-            chart: { height: 320, type: 'radialBar' },
+            chart: { height: 280, type: 'radialBar' },
             series: [0],
-            plotOptions: { radialBar: { startAngle: -110, endAngle: 110, hollow: { size: '65%' }, track: { background: '#fff1f2', strokeWidth: '97%' }, dataLabels: { show: false } } },
-            colors: ['#ec4899'],
+            plotOptions: { radialBar: { startAngle: -90, endAngle: 90, track: { background: '#f1f5f9' }, dataLabels: { show: false } } },
+            colors: ['#f472b6'],
             stroke: { lineCap: 'round' }
         });
         gauge.render();
 
         const chart = new ApexCharts(document.querySelector("#main-chart"), {
-            chart: { height: 280, type: 'area', toolbar: false, animations: { enabled: true, easing: 'linear', dynamicAnimation: { speed: 800 } } },
-            series: [{ name: 'Temp', data: [] }],
-            xaxis: { type: 'datetime', range: 60000, labels: { style: { colors: '#94a3b8' } } },
-            yaxis: { labels: { style: { colors: '#94a3b8' } } },
-            colors: ['#ec4899'],
+            chart: { height: 250, type: 'area', toolbar: false, sparkline: { enabled: false } },
+            series: [{ name: 'Sensor', data: [] }],
+            xaxis: { type: 'datetime', range: 60000, labels: { style: { colors: '#cbd5e1', fontSize: '10px' } } },
+            yaxis: { labels: { style: { colors: '#cbd5e1', fontSize: '10px' } } },
+            colors: ['#6366f1'],
             stroke: { curve: 'smooth', width: 3 },
-            grid: { borderColor: '#f1f5f9' },
-            fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.3, opacityTo: 0 } }
+            fill: { type: 'gradient', gradient: { opacityFrom: 0.2, opacityTo: 0 } },
+            grid: { borderColor: '#f1f5f9' }
         });
         chart.render();
 
+        // Socket Logic
         socket.on('telemetry_stream', (data) => {
             const val = parseFloat(data.value).toFixed(1);
             document.getElementById('live-value').innerText = val;
@@ -155,48 +173,20 @@
             chart.appendData([{ data: [{ x: new Date().getTime(), y: val }] }]);
         });
 
-        // ฟังก์ชันเอฟเฟกต์ "รักออม"
-        function showLovePopup(mode) {
-            const popup = document.createElement('div');
-            popup.className = "fixed inset-0 flex items-center justify-center z-[100] pointer-events-none transition-all duration-500";
-            
-            const content = mode === 'ON' ? 
-                `<div class="bg-white/80 backdrop-blur-xl p-12 rounded-[4rem] border-4 border-pink-400 shadow-[0_0_50px_rgba(236,72,153,0.4)] animate-[bounce_0.5s_ease-in-out]">
-                    <h1 class="text-7xl md:text-9xl font-black italic premium-text">รักออม</h1>
-                </div>` : 
-                `<div class="bg-slate-900/90 backdrop-blur-xl p-8 rounded-[3rem] border-2 border-slate-700 animate-[pulse_0.5s_infinite]">
-                    <h1 class="text-4xl font-black text-white italic tracking-widest">SYSTEM PAUSED</h1>
-                </div>`;
-            
-            popup.innerHTML = content;
-            document.body.appendChild(popup);
-
-            if(mode === 'ON') {
-                for(let i=0; i<20; i++) createHeart();
-            }
-
-            setTimeout(() => {
-                popup.style.opacity = '0';
-                popup.style.transform = 'scale(1.2)';
-                setTimeout(() => popup.remove(), 500);
-            }, 1500);
-        }
-
-        function createHeart() {
-            const heart = document.createElement('i');
-            heart.className = "fas fa-heart heart-particle text-pink-500";
-            heart.style.left = "50%";
-            heart.style.top = "50%";
-            heart.style.setProperty('--tw-translate-x', (Math.random() - 0.5) * 600 + "px");
-            heart.style.setProperty('--tw-translate-y', (Math.random() - 0.5) * 600 + "px");
-            document.body.appendChild(heart);
-            setTimeout(() => heart.remove(), 1000);
-        }
-
         const publishCmd = (cmd) => {
             socket.emit('control_device', { deviceId: 'ESP32_01', command: cmd });
-            showLovePopup(cmd);
-            if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
+            
+            // ถ้ากดปุ่ม START ให้แสดงเอฟเฟกต์รักออม
+            if(cmd === 'START') {
+                const popup = document.getElementById('love-popup');
+                popup.classList.replace('opacity-0', 'opacity-100');
+                popup.classList.remove('scale-90');
+                setTimeout(() => {
+                    popup.classList.replace('opacity-100', 'opacity-0');
+                }, 1200);
+            }
+            
+            if (navigator.vibrate) navigator.vibrate(50);
         };
 
         document.getElementById('threshold').oninput = function() {
@@ -205,15 +195,15 @@
         };
 
         socket.on('connect', () => {
-            const status = document.getElementById('status');
-            status.innerText = "ONLINE";
-            status.className = "text-[10px] font-black px-4 py-1.5 rounded-full border border-green-500 text-green-600 bg-green-50 shadow-sm";
+            document.getElementById('status-dot').className = "led-indicator led-on";
+            document.getElementById('status-text').innerText = "System Online";
+            document.getElementById('status-text').className = "text-xs font-black text-green-600 uppercase tracking-widest";
         });
 
         socket.on('disconnect', () => {
-            const status = document.getElementById('status');
-            status.innerText = "OFFLINE";
-            status.className = "text-[10px] font-black px-4 py-1.5 rounded-full border border-red-500 text-red-600 bg-red-50";
+            document.getElementById('status-dot').className = "led-indicator led-off";
+            document.getElementById('status-text').innerText = "System Offline";
+            document.getElementById('status-text').className = "text-xs font-black text-red-400 uppercase tracking-widest";
         });
     </script>
 </body>
