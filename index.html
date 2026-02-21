@@ -3,137 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AUTOLINK V8 | Galactic Neural Interface</title>
+    <title>AUTOLINK V12 | Clean Hub</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,900;1,900&family=JetBrains+Mono:wght@400;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,700;0,900;1,900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --p-pink: #ff007f; --p-blue: #00d4ff; }
-        body { 
-            background: radial-gradient(circle at top right, #1e1b4b, #0f172a, #020617);
-            font-family: 'Kanit', sans-serif;
-            color: #f8fafc;
-            overflow-x: hidden;
+        :root { --accent: #ec4899; --bg-main: #f8fafc; }
+        body { background: var(--bg-main); font-family: 'Kanit', sans-serif; color: #1e293b; }
+        
+        .v12-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s ease;
+        }
+        
+        .v12-card:hover { transform: translateY(-2px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+
+        .data-orb {
+            background: radial-gradient(circle at center, #ffffff 0%, #f1f5f9 100%);
+            border: 8px solid #ffffff;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
         }
 
-        /* V8 Glassmorphism */
-        .v8-card {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 2.5rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        .status-pill {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
         }
 
-        .neon-border-pink { border-top: 4px solid var(--p-pink); box-shadow: 0 -10px 20px -10px var(--p-pink); }
-        .neon-border-blue { border-top: 4px solid var(--p-blue); box-shadow: 0 -10px 20px -10px var(--p-blue); }
-
-        .terminal-font { font-family: 'JetBrains Mono', monospace; }
-
-        /* แอนิเมชันตัวอักษร "รักออม" */
-        .premium-text-v8 {
-            background: linear-gradient(to right, #ff007f, #ff71ce, #b967ff, #00d4ff);
-            background-size: 300% auto;
+        /* รักออม Gradient */
+        .text-rak-aom {
+            background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: flow 5s linear infinite;
         }
 
-        @keyframes flow { to { background-position: 300% center; } }
-        
-        .pulse-pink { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+        .btn-action {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-action:active { scale: 0.92; }
+
+        #console-log::-webkit-scrollbar { width: 4px; }
+        #console-log::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
     </style>
 </head>
-<body class="p-4 md:p-10 min-h-screen">
+<body class="p-4 md:p-8">
 
-    <nav class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
-        <div class="flex items-center gap-5">
-            <div class="w-16 h-16 v8-card flex items-center justify-center border-2 border-pink-500 shadow-[0_0_20px_rgba(255,0,127,0.4)]">
-                <i class="fas fa-atom text-2xl text-pink-500 animate-spin-slow"></i>
-            </div>
-            <div>
-                <h1 class="text-4xl font-black italic tracking-tighter premium-text-v8">AUTOLINK V8</h1>
-                <p class="text-[9px] font-bold tracking-[0.5em] text-blue-400 uppercase">Neural Processing Unit • Active</p>
-            </div>
+    <header class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <div>
+            <h1 class="text-3xl font-[900] italic tracking-tighter text-slate-900">AUTOLINK <span class="text-pink-500">V12</span></h1>
+            <p class="text-[9px] font-bold text-slate-400 tracking-[0.4em] uppercase mt-1">Omniscient Cloud Fabric • รักออม Edition</p>
         </div>
-
-        <div class="flex gap-4">
-            <div class="v8-card px-6 py-3 flex items-center gap-4 border-slate-700">
-                <div class="text-right">
-                    <p id="clock" class="text-lg font-black terminal-font leading-none text-white">00:00:00</p>
-                    <p class="text-[9px] text-slate-500 font-black uppercase tracking-widest mt-1">Stardate 2026.02</p>
-                </div>
-                <div class="w-[2px] h-8 bg-slate-800"></div>
-                <div id="status-light" class="w-4 h-4 rounded-full bg-slate-700"></div>
-            </div>
-        </div>
-    </nav>
-
-    <main class="max-w-7xl mx-auto grid grid-cols-12 gap-8">
         
-        <div class="col-span-12 lg:col-span-4 v8-card p-10 neon-border-pink relative">
-            <div class="absolute top-6 right-8 text-pink-500/20 text-5xl italic font-black">CORE</div>
-            <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-8">Thermal Distribution</h3>
-            <div id="gauge-v8"></div>
-            <div class="text-center mt-[-40px]">
-                <h2 id="temp-val" class="text-8xl font-black text-white tracking-tighter italic">00.0</h2>
-                <div class="flex justify-center items-center gap-3 mt-2">
-                    <span class="px-3 py-1 bg-pink-500/10 rounded-full text-pink-500 text-[10px] font-black border border-pink-500/20 uppercase">Stable</span>
-                    <span class="text-slate-500 font-bold">UNIT: °C</span>
+        <div class="flex items-center gap-3">
+            <div class="status-pill flex items-center gap-2">
+                <div id="status-led" class="w-2 h-2 rounded-full bg-slate-300"></div>
+                <span id="status-text" class="text-slate-400 uppercase">Standby</span>
+            </div>
+            <div class="status-pill text-slate-900" id="clock">00:00:00</div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto grid grid-cols-12 gap-6">
+        
+        <div class="col-span-12 lg:col-span-4 v12-card p-8 flex flex-col items-center justify-center relative overflow-hidden">
+            <div class="absolute top-4 left-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">Core Node Sensor</div>
+            <div class="data-orb w-56 h-56 rounded-full flex flex-col items-center justify-center mt-4">
+                <span class="text-slate-400 text-xs font-bold uppercase tracking-widest">Temp</span>
+                <h2 id="temp-display" class="text-6xl font-[900] italic text-slate-800 my-1">00.0</h2>
+                <div id="temp-trend" class="text-[10px] font-black text-pink-500 bg-pink-50 px-2 py-0.5 rounded">CELSIUS</div>
+            </div>
+            <div class="w-full mt-8 flex justify-between px-4">
+                <div class="text-center">
+                    <p class="text-[9px] font-black text-slate-300 uppercase">Status</p>
+                    <p class="text-xs font-bold text-slate-700">Optimal</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-[9px] font-black text-slate-300 uppercase">Node ID</p>
+                    <p class="text-xs font-bold text-slate-700">ESP32-01</p>
                 </div>
             </div>
         </div>
 
-        <div class="col-span-12 lg:col-span-8 v8-card p-10 neon-border-blue">
-            <div class="flex justify-between items-center mb-10">
-                <span class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Telemetry Flux Analysis</span>
-                <div class="flex gap-4">
-                    <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-pink-500 shadow-[0_0_8px_#ff007f]"></div><span class="text-[9px] font-bold">TEMP</span></div>
-                    <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_#00d4ff]"></div><span class="text-[9px] font-bold">LOAD</span></div>
+        <div class="col-span-12 lg:col-span-8 v12-card p-8">
+            <div class="flex justify-between items-center mb-6">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Predictive Analytics</span>
+                <div class="flex gap-2">
+                    <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                    <div class="w-2 h-2 rounded-full bg-pink-500"></div>
                 </div>
             </div>
-            <div id="chart-v8"></div>
+            <div id="chart-v12"></div>
         </div>
 
-        <div class="col-span-12 lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-8">
-            <button onclick="executeAction('POWER_START')" class="v8-card p-8 group relative overflow-hidden transition-all hover:scale-[1.02] active:scale-95 bg-gradient-to-br from-slate-900 to-black border-2 border-slate-800 hover:border-pink-500">
-                <div class="absolute -right-4 -bottom-4 text-pink-500/5 text-9xl italic font-black group-hover:text-pink-500/10 transition-all">GO</div>
-                <i class="fas fa-bolt text-3xl text-pink-500 mb-6 group-hover:drop-shadow-[0_0_15px_#ff007f]"></i>
-                <h4 class="text-2xl font-black italic text-white mb-2">SYSTEM ON</h4>
-                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Execute Master Protocol</p>
-            </button>
-
-            <button onclick="executeAction('POWER_STOP')" class="v8-card p-8 group transition-all hover:scale-[1.02] active:scale-95 bg-slate-900/50 border-2 border-slate-800 hover:border-red-500">
-                <i class="fas fa-power-off text-3xl text-slate-600 mb-6 group-hover:text-red-500"></i>
-                <h4 class="text-2xl font-black italic text-slate-400 mb-2">FORCE STOP</h4>
-                <p class="text-[10px] text-slate-600 font-bold uppercase tracking-widest">Emergency Shutdown</p>
-            </button>
-        </div>
-
-        <div class="col-span-12 lg:col-span-5 v8-card p-8 flex flex-col h-full min-h-[300px]">
-            <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Neural Event Log</h3>
-            <div id="logs" class="flex-1 overflow-y-auto terminal-font text-[10px] space-y-2 pr-4">
-                <p class="text-blue-400 animate-pulse">> Initializing V8 Core... Done</p>
-                <p class="text-pink-500">> Searching for "รักออม" Profile... Found</p>
+        <div class="col-span-12 lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div class="v12-card p-6 border-l-[6px] border-slate-900">
+                <h3 class="text-xs font-black text-slate-400 uppercase mb-4 tracking-tighter">Power Control</h3>
+                <div class="flex gap-3">
+                    <button onclick="sendCommand('START')" class="btn-action flex-1 py-4 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-lg shadow-slate-200">INITIATE</button>
+                    <button onclick="sendCommand('STOP')" class="btn-action flex-1 py-4 bg-white border border-slate-200 text-slate-400 rounded-2xl font-black text-sm">SHUTDOWN</button>
+                </div>
             </div>
-            <div class="mt-6 pt-6 border-t border-slate-800 flex justify-between items-center">
-                <span class="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Safety Status: Locked</span>
-                <i class="fas fa-shield-halved text-blue-500 text-xs shadow-glow"></i>
+
+            <div class="v12-card p-6 border-l-[6px] border-pink-500">
+                <h3 class="text-xs font-black text-slate-400 uppercase mb-4 tracking-tighter">Auxiliary Light</h3>
+                <div class="flex gap-3">
+                    <button onclick="sendCommand('LIGHT_ON')" class="btn-action flex-1 py-4 bg-pink-50 text-pink-600 rounded-2xl font-black text-sm">ON</button>
+                    <button onclick="sendCommand('LIGHT_OFF')" class="btn-action flex-1 py-4 bg-white border border-pink-100 text-slate-300 rounded-2xl font-black text-sm">OFF</button>
+                </div>
             </div>
         </div>
+
+        <div class="col-span-12 lg:col-span-5 v12-card p-6 flex flex-col justify-between">
+            <div>
+                <span class="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-4 block">System Feedback</span>
+                <div id="console-log" class="h-28 overflow-y-auto text-[10px] font-medium space-y-1 text-slate-500 italic">
+                    <p>> Waiting for neural link...</p>
+                </div>
+            </div>
+            <div class="pt-4 border-t border-slate-50 flex justify-between items-end">
+                <div>
+                    <p class="text-[9px] font-black text-slate-300 uppercase">Master Operator</p>
+                    <p class="text-xl font-black text-rak-aom italic">รักออม</p>
+                </div>
+                <i class="fas fa-fingerprint text-slate-200 text-3xl"></i>
+            </div>
+        </div>
+
     </main>
 
-    <div id="v8-overlay" class="fixed inset-0 z-[9999] pointer-events-none opacity-0 transition-all duration-1000 flex items-center justify-center">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-3xl"></div>
-        <div class="relative text-center">
-            <h1 class="text-[12rem] md:text-[20rem] font-black italic premium-text-v8 scale-75 animate-bounce">รักออม</h1>
-            <div class="h-1 w-full bg-gradient-to-right from-transparent via-pink-500 to-transparent animate-pulse"></div>
-            <p class="text-white text-2xl font-bold uppercase tracking-[1.5em] mt-10">Command Executed</p>
+    <div id="love-popup" class="fixed inset-0 z-[100] flex items-center justify-center opacity-0 pointer-events-none transition-all duration-500 scale-95">
+        <div class="bg-white/80 backdrop-blur-xl border border-pink-200 px-12 py-6 rounded-[32px] shadow-2xl text-center">
+            <h1 class="text-4xl font-[900] text-rak-aom italic tracking-tighter">รักออม</h1>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-2">Verified Success</p>
         </div>
     </div>
 
@@ -141,71 +153,58 @@
         const MY_IP = "172.20.10.3";
         const socket = io(`http://${MY_IP}:3000`);
 
-        // Clock V8
+        // Time
         setInterval(() => {
             document.getElementById('clock').innerText = new Date().toLocaleTimeString();
         }, 1000);
 
-        // Logs
-        function addLog(msg, type = 'info') {
-            const logs = document.getElementById('logs');
-            const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
-            const colors = { info: 'text-blue-400', warn: 'text-yellow-400', error: 'text-red-500', love: 'text-pink-500' };
-            logs.innerHTML += `<p class="${colors[type]}"><span class="text-slate-600">[${time}]</span> > ${msg}</p>`;
-            logs.scrollTop = logs.scrollHeight;
+        function log(msg) {
+            const container = document.getElementById('console-log');
+            container.innerHTML += `<p>> ${msg}</p>`;
+            container.scrollTop = container.scrollHeight;
         }
 
-        // Charts V8
-        const gauge = new ApexCharts(document.querySelector("#gauge-v8"), {
-            chart: { height: 350, type: 'radialBar' },
-            series: [0],
-            plotOptions: { radialBar: { 
-                startAngle: -135, endAngle: 135, 
-                hollow: { size: '70%', background: 'transparent' },
-                track: { background: '#1e293b', strokeWidth: '100%' },
-                dataLabels: { show: false }
-            } },
-            colors: ['#ff007f'],
-            stroke: { lineCap: 'butt' }
-        });
-        gauge.render();
-
-        const chart = new ApexCharts(document.querySelector("#chart-v8"), {
-            chart: { height: 280, type: 'area', toolbar: false, background: 'transparent', animations: { enabled: true, easing: 'linear', dynamicAnimation: { speed: 1000 } } },
-            series: [{ name: 'Thermal', data: [] }],
-            xaxis: { type: 'datetime', range: 60000, labels: { style: { colors: '#475569' } } },
-            yaxis: { labels: { style: { colors: '#475569' } } },
-            colors: ['#00d4ff'],
-            stroke: { curve: 'smooth', width: 3 },
-            grid: { borderColor: '#1e293b' },
-            fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0 } }
+        // ApexCharts V12
+        const chart = new ApexCharts(document.querySelector("#chart-v12"), {
+            chart: { height: 250, type: 'area', toolbar: false, zoom: { enabled: false } },
+            series: [{ name: 'Data', data: [] }],
+            stroke: { curve: 'smooth', width: 3, colors: ['#ec4899'] },
+            fill: { type: 'gradient', gradient: { opacityFrom: 0.2, opacityTo: 0 } },
+            xaxis: { type: 'datetime', range: 60000, labels: { style: { colors: '#94a3b8' } } },
+            yaxis: { labels: { style: { colors: '#94a3b8' } } },
+            grid: { borderColor: '#f1f5f9' },
+            colors: ['#ec4899']
         });
         chart.render();
 
-        // Execution Logic
-        function executeAction(cmd) {
-            socket.emit('control_device', { deviceId: 'V8_NEURAL_NODE', command: cmd });
-            addLog(`Signal Sent: ${cmd}`, 'info');
+        // Control Logic
+        function sendCommand(cmd) {
+            socket.emit('control_device', { deviceId: 'V12_CLEAN_NODE', command: cmd });
+            log(`Executing: ${cmd}`);
 
-            if(cmd === 'POWER_START') {
-                const ov = document.getElementById('v8-overlay');
-                ov.classList.replace('opacity-0', 'opacity-100');
-                addLog('CRITICAL: รักออม Protocol Activated!', 'love');
-                setTimeout(() => ov.classList.replace('opacity-100', 'opacity-0'), 2500);
+            if(cmd === 'START' || cmd === 'LIGHT_ON') {
+                const pop = document.getElementById('love-popup');
+                pop.classList.replace('opacity-0', 'opacity-100');
+                pop.classList.replace('scale-95', 'scale-100');
+                setTimeout(() => {
+                    pop.classList.replace('opacity-100', 'opacity-0');
+                    pop.classList.replace('scale-100', 'scale-95');
+                }, 1000);
             }
-            if (navigator.vibrate) navigator.vibrate([40, 20, 40]);
+            if (navigator.vibrate) navigator.vibrate(30);
         }
 
         // Socket logic
         socket.on('connect', () => {
-            document.getElementById('status-light').className = "w-4 h-4 rounded-full bg-green-500 shadow-[0_0_15px_#22c55e]";
-            addLog('Neural Link Established', 'info');
+            document.getElementById('status-led').className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]";
+            document.getElementById('status-text').innerText = "Online";
+            document.getElementById('status-text').className = "text-green-600 uppercase";
+            log("Secure Connection Established");
         });
 
         socket.on('telemetry_stream', (data) => {
             const v = parseFloat(data.value).toFixed(1);
-            document.getElementById('temp-val').innerText = v;
-            gauge.updateSeries([v]);
+            document.getElementById('temp-display').innerText = v;
             chart.appendData([{ data: [{ x: new Date().getTime(), y: v }] }]);
         });
     </script>
