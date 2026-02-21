@@ -16,7 +16,6 @@
         :root { --accent: #f472b6; --bg-light: #fffcfd; }
         body { background: var(--bg-light); font-family: 'Kanit', sans-serif; overflow-x: hidden; }
         
-        /* เอฟเฟกต์ "รักออม" แบบใหม่ */
         .premium-text {
             background: linear-gradient(to right, #ec4899, #ef4444, #f43f5e, #ec4899);
             background-size: 200% auto;
@@ -26,10 +25,7 @@
             filter: drop-shadow(0 15px 15px rgba(236, 72, 153, 0.3));
         }
 
-        @keyframes shine {
-            to { background-position: 200% center; }
-        }
-
+        @keyframes shine { to { background-position: 200% center; } }
         @keyframes floating {
             0%, 100% { transform: translateY(0) scale(1); }
             50% { transform: translateY(-15px) scale(1.02); }
@@ -42,11 +38,20 @@
             border: 1px solid rgba(255, 255, 255, 0.9); 
         }
 
-        /* ตกแต่งปุ่มให้ดูละมุนขึ้น */
-        .btn-love {
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+        .btn-love { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .btn-love:hover { transform: translateY(-5px); box-shadow: 0 20px 30px -10px rgba(236, 72, 153, 0.5); }
+
+        /* เอฟเฟกต์หัวใจกระจาย */
+        .heart-particle {
+            position: fixed;
+            pointer-events: none;
+            animation: fly 1s ease-out forwards;
+            z-index: 100;
+        }
+        @keyframes fly {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--tw-translate-x), var(--tw-translate-y)) scale(0); opacity: 0; }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -74,7 +79,6 @@
     </nav>
 
     <main class="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full grid grid-cols-12 gap-8">
-        
         <div class="col-span-12 lg:col-span-4 glass p-10 rounded-[3.5rem] flex flex-col items-center justify-center relative">
             <p class="text-slate-400 text-[10px] font-black tracking-widest uppercase mb-4">Core Temperature</p>
             <div id="gauge-container" class="w-full"></div>
@@ -120,21 +124,13 @@
     </main>
 
     <script>
-        // ใส่ IP เครื่องคอมพิวเตอร์ของคุณที่นี่
         const MY_IP = "172.20.10.3";
         const socket = io(window.location.hostname === "localhost" ? "http://localhost:3000" : `http://${MY_IP}:3000`);
 
         const gauge = new ApexCharts(document.querySelector("#gauge-container"), {
             chart: { height: 320, type: 'radialBar' },
             series: [0],
-            plotOptions: { 
-                radialBar: { 
-                    startAngle: -110, endAngle: 110,
-                    hollow: { size: '65%' },
-                    track: { background: '#fff1f2', strokeWidth: '97%' }, 
-                    dataLabels: { show: false } 
-                } 
-            },
+            plotOptions: { radialBar: { startAngle: -110, endAngle: 110, hollow: { size: '65%' }, track: { background: '#fff1f2', strokeWidth: '97%' }, dataLabels: { show: false } } },
             colors: ['#ec4899'],
             stroke: { lineCap: 'round' }
         });
@@ -159,9 +155,48 @@
             chart.appendData([{ data: [{ x: new Date().getTime(), y: val }] }]);
         });
 
+        // ฟังก์ชันเอฟเฟกต์ "รักออม"
+        function showLovePopup(mode) {
+            const popup = document.createElement('div');
+            popup.className = "fixed inset-0 flex items-center justify-center z-[100] pointer-events-none transition-all duration-500";
+            
+            const content = mode === 'ON' ? 
+                `<div class="bg-white/80 backdrop-blur-xl p-12 rounded-[4rem] border-4 border-pink-400 shadow-[0_0_50px_rgba(236,72,153,0.4)] animate-[bounce_0.5s_ease-in-out]">
+                    <h1 class="text-7xl md:text-9xl font-black italic premium-text">รักออม</h1>
+                </div>` : 
+                `<div class="bg-slate-900/90 backdrop-blur-xl p-8 rounded-[3rem] border-2 border-slate-700 animate-[pulse_0.5s_infinite]">
+                    <h1 class="text-4xl font-black text-white italic tracking-widest">SYSTEM PAUSED</h1>
+                </div>`;
+            
+            popup.innerHTML = content;
+            document.body.appendChild(popup);
+
+            if(mode === 'ON') {
+                for(let i=0; i<20; i++) createHeart();
+            }
+
+            setTimeout(() => {
+                popup.style.opacity = '0';
+                popup.style.transform = 'scale(1.2)';
+                setTimeout(() => popup.remove(), 500);
+            }, 1500);
+        }
+
+        function createHeart() {
+            const heart = document.createElement('i');
+            heart.className = "fas fa-heart heart-particle text-pink-500";
+            heart.style.left = "50%";
+            heart.style.top = "50%";
+            heart.style.setProperty('--tw-translate-x', (Math.random() - 0.5) * 600 + "px");
+            heart.style.setProperty('--tw-translate-y', (Math.random() - 0.5) * 600 + "px");
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 1000);
+        }
+
         const publishCmd = (cmd) => {
             socket.emit('control_device', { deviceId: 'ESP32_01', command: cmd });
-            if (navigator.vibrate) navigator.vibrate(50); // สั่นเบาๆ เวลาเมีย เอ๊ย ออม เอ๊ย เรากดปุ่ม
+            showLovePopup(cmd);
+            if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
         };
 
         document.getElementById('threshold').oninput = function() {
