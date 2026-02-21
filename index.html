@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AUTOLINK V12.2 | I/O Config</title>
+    <title>AUTOLINK V12.5 | Master Hub</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,700;0,900;1,900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -15,180 +15,237 @@
         :root { --accent: #ec4899; --bg-main: #f8fafc; }
         body { background: var(--bg-main); font-family: 'Kanit', sans-serif; color: #1e293b; overflow-x: hidden; }
         
-        .v12-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
-        .nav-active { color: var(--accent); background: #fff1f2; border-radius: 16px; }
+        .v12-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 28px; transition: all 0.3s ease; }
+        .v12-card:hover { box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); }
+        .nav-active { color: var(--accent); background: #fff1f2; border-radius: 20px; }
         .page-content { display: none; }
-        .page-active { display: block; animation: fadeIn 0.4s ease; }
+        .page-active { display: block; animation: slideUp 0.4s ease-out; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        .bottom-nav { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); border-top: 1px solid #e2e8f0; }
+        .glass-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); border-top: 1px solid #e2e8f0; }
+        .text-rak-aom { background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        /* I/O Toggle Styles */
-        .io-select { appearance: none; background: #f1f5f9; border: 1px solid #e2e8f0; padding: 8px 16px; border-radius: 12px; font-weight: 600; width: 100%; }
-        .pin-label { font-size: 10px; font-weight: 900; color: #94a3b8; letter-spacing: 0.1em; }
+        /* Time Input Custom */
+        input[type="time"] { background: #f1f5f9; border: none; padding: 10px; border-radius: 12px; font-weight: bold; font-family: 'JetBrains Mono'; }
     </style>
 </head>
-<body class="pb-24 pt-4 px-4">
+<body class="pb-28 pt-6 px-4 md:px-10">
 
-    <header class="max-w-6xl mx-auto flex justify-between items-center mb-6">
+    <header class="max-w-6xl mx-auto flex justify-between items-center mb-8">
         <div>
-            <h1 class="text-2xl font-[900] italic text-slate-900">AUTOLINK <span class="text-pink-500">V12.2</span></h1>
-            <p id="clock" class="text-[10px] font-bold text-slate-400 tracking-widest uppercase">I/O Config Active</p>
+            <h1 class="text-3xl font-[900] italic text-slate-900 tracking-tighter">AUTOLINK <span class="text-rak-aom">V12.5</span></h1>
+            <div class="flex items-center gap-2 mt-1">
+                <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Neural Network: Active</span>
+            </div>
         </div>
-        <div id="status-tag" class="bg-white px-4 py-1.5 rounded-full border border-slate-100 flex items-center gap-2">
-            <div id="status-led" class="w-2 h-2 rounded-full bg-slate-300"></div>
-            <span class="text-[10px] font-black text-slate-400 uppercase">Standby</span>
+        <div class="flex flex-col items-end">
+            <span id="clock" class="text-lg font-black text-slate-800 leading-none">00:00:00</span>
+            <span class="text-[9px] font-bold text-slate-400 uppercase">22 Feb 2026</span>
         </div>
     </header>
 
     <main id="page-home" class="max-w-6xl mx-auto page-content page-active">
         <div class="grid grid-cols-12 gap-6">
-            <div class="col-span-12 lg:col-span-4 v12-card p-8 flex flex-col items-center">
-                <span class="pin-label mb-4">LIVE TELEMETRY</span>
-                <div class="w-48 h-48 rounded-full border-4 border-pink-50 flex flex-col items-center justify-center bg-slate-50 shadow-inner">
-                    <h2 id="temp-display" class="text-6xl font-[900] italic text-slate-800">00.0</h2>
-                    <span class="text-pink-500 font-bold text-[10px]">VALUE</span>
+            <div class="col-span-12 lg:col-span-4 v12-card p-6 border-b-4 border-pink-500">
+                <div class="flex justify-between items-start mb-6">
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Environment</span>
+                    <i class="fas fa-cloud-sun text-orange-400 text-xl"></i>
+                </div>
+                <div class="text-center">
+                    <h2 id="temp-display" class="text-7xl font-[900] text-slate-800 italic">00.0<span class="text-2xl not-italic text-slate-300">°C</span></h2>
+                    <p class="text-xs font-bold text-slate-400 mt-2 uppercase tracking-tighter">Indoor Node 01</p>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mt-8">
+                    <div class="bg-slate-50 p-4 rounded-2xl text-center">
+                        <p class="text-[9px] font-black text-slate-400 uppercase">Humidity</p>
+                        <p class="font-bold text-slate-700">45%</p>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-2xl text-center">
+                        <p class="text-[9px] font-black text-slate-400 uppercase">Outdoor</p>
+                        <p class="font-bold text-slate-700">32°C</p>
+                    </div>
                 </div>
             </div>
-            <div class="col-span-12 lg:col-span-8 v12-card p-6">
-                <h3 class="pin-label mb-4">QUICK ACTIONS</h3>
-                <div class="grid grid-cols-2 gap-4">
-                    <button onclick="sendCommand('START')" class="py-4 bg-slate-900 text-white rounded-2xl font-black">START</button>
-                    <button onclick="sendCommand('STOP')" class="py-4 bg-white border border-slate-200 text-slate-400 rounded-2xl font-black">STOP</button>
+
+            <div class="col-span-12 lg:col-span-8 space-y-6">
+                <div class="v12-card p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-sm font-black uppercase text-slate-400 tracking-widest">Quick Commands</h3>
+                        <div class="flex gap-1">
+                            <span class="w-1 h-1 bg-pink-500 rounded-full"></span>
+                            <span class="w-1 h-1 bg-pink-300 rounded-full"></span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <button onclick="sendCommand('START')" class="p-6 bg-slate-900 text-white rounded-3xl font-black flex flex-col items-center gap-3 transition-transform active:scale-95 shadow-xl shadow-slate-200">
+                            <i class="fas fa-bolt text-xl text-yellow-400"></i> SYSTEM
+                        </button>
+                        <button onclick="sendCommand('LIGHT_ON')" class="p-6 bg-white border border-slate-100 rounded-3xl font-black flex flex-col items-center gap-3 transition-transform active:scale-95 text-slate-700">
+                            <i class="fas fa-lightbulb text-xl text-pink-500"></i> LIGHTS
+                        </button>
+                        <button onclick="sendCommand('STOP')" class="p-6 bg-slate-50 rounded-3xl font-black flex flex-col items-center gap-3 transition-transform active:scale-95 text-slate-400">
+                            <i class="fas fa-power-off text-xl"></i> SHUTDOWN
+                        </button>
+                    </div>
+                </div>
+
+                <div class="v12-card p-6 h-48 overflow-hidden">
+                    <div id="mini-chart"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <main id="page-timer" class="max-w-6xl mx-auto page-content">
+        <div class="v12-card p-8">
+            <h3 class="text-xl font-black italic mb-8">Automation Scheduler</h3>
+            <div class="space-y-6">
+                <div class="flex flex-wrap items-center justify-between p-6 bg-slate-50 rounded-3xl gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-pink-500 shadow-sm">
+                            <i class="fas fa-sun"></i>
+                        </div>
+                        <div>
+                            <p class="font-black text-slate-700">Morning Wake-up</p>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase">Action: LIGHT ON</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <input type="time" value="06:30">
+                        <div class="w-12 h-6 bg-pink-500 rounded-full relative cursor-pointer">
+                            <div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between p-6 bg-slate-50 rounded-3xl gap-4 opacity-50">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-400 shadow-sm">
+                            <i class="fas fa-moon"></i>
+                        </div>
+                        <div>
+                            <p class="font-black text-slate-700">Night Mode</p>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase">Action: SYSTEM STOP</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <input type="time" value="22:00">
+                        <div class="w-12 h-6 bg-slate-200 rounded-full relative cursor-pointer">
+                            <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
     <main id="page-io" class="max-w-6xl mx-auto page-content">
-        <div class="v12-card p-6 md:p-8">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="font-black text-xl italic text-slate-900">I/O Configurator</h3>
-                <i class="fas fa-microchip text-slate-300"></i>
+        <div class="v12-card p-8">
+            <div class="flex justify-between items-center mb-8">
+                <h3 class="text-xl font-black italic">Hardware Mapping</h3>
+                <span class="text-[10px] font-black bg-blue-50 text-blue-500 px-3 py-1 rounded-full uppercase">ESP32-S3 Mode</span>
             </div>
-
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="space-y-6">
-                    <h4 class="text-pink-500 font-black text-xs uppercase tracking-widest border-b border-pink-50 pb-2">Input Pins (Sensors)</h4>
-                    
-                    <div class="space-y-2">
-                        <label class="pin-label">SENSOR 1 (Analog/Digital)</label>
-                        <select class="io-select" id="input1">
-                            <option value="GPIO34">GPIO 34 (ADC)</option>
-                            <option value="GPIO35">GPIO 35 (ADC)</option>
-                            <option value="GPIO32">GPIO 32</option>
-                            <option value="DISABLED">-- DISABLED --</option>
-                        </select>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="pin-label">SENSOR TYPE</label>
-                        <select class="io-select" id="sensor-type">
-                            <option value="TEMP">Temperature (DHT22)</option>
-                            <option value="HUMID">Humidity</option>
-                            <option value="LDR">Light (Analog)</option>
-                        </select>
-                    </div>
+                <div class="space-y-4">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Input Source (Sensors)</label>
+                    <select class="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold appearance-none">
+                        <option>GPIO 34 - DHT22 Sensor</option>
+                        <option>GPIO 35 - LDR Analog</option>
+                    </select>
                 </div>
-
-                <div class="space-y-6">
-                    <h4 class="text-blue-500 font-black text-xs uppercase tracking-widest border-b border-blue-50 pb-2">Output Pins (Actuators)</h4>
-                    
-                    <div class="space-y-2">
-                        <label class="pin-label">RELAY CHANNEL 1</label>
-                        <select class="io-select" id="output1">
-                            <option value="GPIO2">GPIO 2 (Onboard LED)</option>
-                            <option value="GPIO4">GPIO 4</option>
-                            <option value="GPIO5">GPIO 5</option>
-                            <option value="DISABLED">-- DISABLED --</option>
-                        </select>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="pin-label">FAN / PUMP CONTROL</label>
-                        <select class="io-select" id="output2">
-                            <option value="GPIO18">GPIO 18</option>
-                            <option value="GPIO19">GPIO 19</option>
-                            <option value="DISABLED" selected>-- DISABLED --</option>
-                        </select>
-                    </div>
+                <div class="space-y-4">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Output 1 (Relay)</label>
+                    <select class="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold appearance-none">
+                        <option>GPIO 2 - Main Pump</option>
+                        <option>GPIO 4 - Exhaust Fan</option>
+                    </select>
                 </div>
             </div>
-
-            <button onclick="saveIOConfig()" class="w-full mt-10 py-4 bg-pink-500 text-white rounded-2xl font-black shadow-lg shadow-pink-100 flex items-center justify-center gap-3">
-                <i class="fas fa-save"></i> APPLY CONFIGURATION
+            <button onclick="saveConfig()" class="w-full mt-10 py-5 bg-rak-aom text-white rounded-[2rem] font-black text-lg shadow-xl shadow-pink-100">
+                SAVE & DEPLOY CONFIG
             </button>
         </div>
     </main>
 
-    <main id="page-stats" class="max-w-6xl mx-auto page-content">
-        <div class="v12-card p-6">
-            <div id="main-chart-v12" class="w-full h-[400px]"></div>
-        </div>
-    </main>
-
-    <nav class="fixed bottom-0 left-0 right-0 bottom-nav z-[50] flex justify-around items-center p-3 px-4 shadow-2xl">
-        <button onclick="switchPage('home', this)" class="flex flex-col items-center p-2 px-4 nav-active transition-all">
-            <i class="fas fa-home mb-1"></i>
-            <span class="text-[8px] font-black uppercase">Home</span>
+    <nav class="fixed bottom-0 left-0 right-0 glass-nav z-[100] p-4 pb-8 md:pb-4 flex justify-around items-center">
+        <button onclick="switchPage('home', this)" class="flex flex-col items-center gap-1 p-2 px-6 nav-active transition-all">
+            <i class="fas fa-home"></i>
+            <span class="text-[9px] font-black uppercase">Home</span>
         </button>
-        <button onclick="switchPage('io', this)" class="flex flex-col items-center p-2 px-4 text-slate-300 transition-all">
-            <i class="fas fa-plug mb-1"></i>
-            <span class="text-[8px] font-black uppercase">I/O Config</span>
+        <button onclick="switchPage('timer', this)" class="flex flex-col items-center gap-1 p-2 px-6 text-slate-300 transition-all">
+            <i class="fas fa-clock"></i>
+            <span class="text-[9px] font-black uppercase">Schedule</span>
         </button>
-        <button onclick="switchPage('stats', this)" class="flex flex-col items-center p-2 px-4 text-slate-300 transition-all">
-            <i class="fas fa-chart-line mb-1"></i>
-            <span class="text-[8px] font-black uppercase">Stats</span>
+        <button onclick="switchPage('io', this)" class="flex flex-col items-center gap-1 p-2 px-6 text-slate-300 transition-all">
+            <i class="fas fa-microchip"></i>
+            <span class="text-[9px] font-black uppercase">I/O PINS</span>
         </button>
     </nav>
 
-    <div id="notif" class="fixed top-10 left-1/2 -translate-x-1/2 z-[100] bg-white border border-slate-100 shadow-2xl px-8 py-3 rounded-full opacity-0 transition-all duration-500 pointer-events-none">
-        <span class="text-pink-500 font-black italic tracking-tighter">รักออม: อัปเดตการเชื่อมต่อแล้ว!</span>
+    <div id="toast" class="fixed top-10 left-1/2 -translate-x-1/2 z-[200] opacity-0 transition-all duration-500 pointer-events-none">
+        <div class="bg-white border border-pink-50 shadow-2xl px-10 py-4 rounded-[2rem] text-center">
+            <h4 class="text-rak-aom font-black italic text-xl">รักออม</h4>
+            <p id="toast-msg" class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">Command Executed</p>
+        </div>
     </div>
 
     <script>
         const MY_IP = "172.20.10.3";
         const socket = io(`http://${MY_IP}:3000`);
 
+        // Navigation
         function switchPage(pageId, btn) {
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('page-active'));
-            document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.remove('nav-active', 'text-slate-300'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('nav-active', 'text-slate-300'));
             document.getElementById(`page-${pageId}`).classList.add('page-active');
             btn.classList.add('nav-active');
             if (navigator.vibrate) navigator.vibrate(25);
         }
 
-        function saveIOConfig() {
-            const config = {
-                input1: document.getElementById('input1').value,
-                sensorType: document.getElementById('sensor-type').value,
-                output1: document.getElementById('output1').value,
-                output2: document.getElementById('output2').value
-            };
-            socket.emit('update_io_config', config);
-            
-            // Show Notif
-            const notif = document.getElementById('notif');
-            notif.classList.replace('opacity-0', 'opacity-100');
-            setTimeout(() => notif.classList.replace('opacity-100', 'opacity-0'), 2000);
+        // Charts
+        const miniChart = new ApexCharts(document.querySelector("#mini-chart"), {
+            chart: { height: 180, type: 'area', toolbar: false, sparkline: { enabled: true } },
+            series: [{ name: 'Value', data: [31, 40, 28, 51, 42, 109, 100] }],
+            stroke: { curve: 'smooth', width: 4, colors: ['#ec4899'] },
+            fill: { type: 'gradient', gradient: { opacityFrom: 0.3, opacityTo: 0 } },
+            colors: ['#ec4899']
+        });
+        miniChart.render();
+
+        // Control & Logic
+        function sendCommand(cmd) {
+            socket.emit('control_device', { deviceId: 'V12_MASTER', command: cmd });
+            showToast(cmd === 'START' ? 'System Initiated' : 'Signal Sent');
+            if (navigator.vibrate) navigator.vibrate(40);
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            t.classList.replace('opacity-0', 'opacity-100');
+            t.style.transform = 'translate(-50%, 20px)';
+            setTimeout(() => {
+                t.classList.replace('opacity-100', 'opacity-0');
+                t.style.transform = 'translate(-50%, 0)';
+            }, 1500);
+        }
+
+        function saveConfig() {
+            showToast('Configuration Saved');
             if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
         }
 
-        function sendCommand(cmd) {
-            socket.emit('control_device', { deviceId: 'V12_NODE', command: cmd });
-        }
-
         // Socket Events
-        socket.on('connect', () => {
-            document.getElementById('status-led').className = "w-2 h-2 rounded-full bg-green-500";
-        });
-
         socket.on('telemetry_stream', (data) => {
-            document.getElementById('temp-display').innerText = parseFloat(data.value).toFixed(1);
+            const v = parseFloat(data.value).toFixed(1);
+            document.getElementById('temp-display').innerHTML = `${v}<span class="text-2xl not-italic text-slate-300">°C</span>`;
         });
 
-        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+        setInterval(() => { 
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB'); 
+        }, 1000);
     </script>
 </body>
 </html>
